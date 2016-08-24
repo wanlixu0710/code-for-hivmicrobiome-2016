@@ -39,8 +39,29 @@ clinical$cd4.dif <- clinical$cd4.d7-clinical$cd4.d0
 a.div <- inner_join(a.div, clinical)
 
 ### 1. compare patient and control ###
+## demographic
+summary(a.div[,(2:5)])
+sd(a.div$age)
+summary(factor(a.div$female))
+17/(15+17)
+summary(factor(a.div$group))
+21/(11+21)
+pa <- a.div %>% filter (group=="patient")
+summary(pa[,(2:5)])
+sd(pa$age)
+summary(factor(pa$female))
+14/21
+12/21
+he <- a.div %>% filter (group=="healthy")
+summary(he[,(2:5)])
+sd(he$age)
+summary(factor(he$female))
+3/11
+4/11
+
 ## 1.1 first, let's see whether there are demographic difference between the two groups
 # age
+fig1 <- plot(a.div$group, a.div$age)
 plot(a.div$group, a.div$age)
 t.test(a.div$age~a.div$group) # there is no age difference between groups
 # race
@@ -60,7 +81,7 @@ ggplot(a.div,  aes( y=as.numeric(simpson), x=factor(group)))+ geom_boxplot(aes(c
 lm.simpson <- lm(a.div$simpson~a.div$group*a.div$gender)
 summary(lm.simpson)# it looks like there is trend, maybe with increased samples size, it will be signigicant, also checked race and age, no significant difference
 
-## 1.2 nms comparision, didn't show specific patterns
+## 1.3 nms comparision, didn't show specific patterns
 otu.nms <-otu[,-(2491:2492)]
 nms <- metaMDS(otu.nms, dist="bray", k=2, trymax=250, wascores=TRUE, trymin=50) # first try to fit in 2 dimentions
 stat <- data.frame(nms$points)
@@ -77,13 +98,13 @@ stat.d <- inner_join(stat, a.div)
 scatterplot3d(stat.d[,1:3], color=as.integer(stat.d$group), pch=16, grid=TRUE, box=FALSE) #didn't show specific patterns
 scatterplot3d(stat.d[,1:3], color=as.integer(stat.d$gender), pch=16, grid=TRUE, box=FALSE) 
 
-## 1.3 permanova
+## 1.4 permanova
 ## Calculation of bray curtis dissimilarity
 br_dist <- vegdist(otu.nms, method="bray")
 adonis(br_dist ~a.div$group, na.rm=TRUE, permutations=99) #not significant
 
 
-## 1.4 genus level comparision 
+## 1.5 genus level comparision 
 L6 <- read.csv(file="120215JW515F-pr.fasta.otus.fa.genus.percentages.csv", sep=",", header=T)
 rownames(L6) <- L6$Sample_ID
 L6 <- L6[,-1]
