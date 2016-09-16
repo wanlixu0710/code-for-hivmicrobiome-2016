@@ -13,7 +13,7 @@ library(indicspecies)
 library(heatmap3)
 library(devEMF)
 library(tidyr)
-rm(list=ls())
+#rm(list=ls())
 
 ### research question
 ## could try to see the patients group or combine patients & control together (if group itself doesnt have sig)
@@ -121,7 +121,7 @@ cor4 <- data.frame(cor2$P)[,(1:2)]%>% mutate(draw.rowname=row.names(cor2$P))%>%f
 
 # NO trend has been found with simpson and auto-antibodies. Move to beta-diversity
 
-### 1.2 b-diversity pt only
+### 1.3 b-diversity pt only
 otu.pt <- otu[otu$Sample_ID %in% pt.a.div$Sample_ID,]
 otu.nms <-otu.pt[,-(2491:2493)]
 nms <- metaMDS(otu.nms, dist="bray", k=2, trymax=250, wascores=TRUE, trymin=50) # first try to fit in 2 dimentions
@@ -171,3 +171,55 @@ ggplot(stat.d, aes(MDS1, MDS2))+geom_point(aes(color=cd8_igg.fold))+scale_colour
 
 #????? needs to look at the pattens of each pictures and have the envfit work!
 
+### 1.4 Permanova to test the statistical difference
+
+otu.per <- inner_join(otu,pt.a.div)
+br_dist <- vegdist(otu.per[,(1:2490)], method="bray")
+str(br_dist)
+# cd4_igg.d0
+adonis(br_dist ~otu.per$cd4_igg.d0, na.rm=TRUE, permutations=999)#sig
+# dsdna_igg.d0
+adonis(br_dist ~otu.per$dsdna_igg.d0, na.rm=TRUE, permutations=999)#not sig
+#ana_igg.d0
+adonis(br_dist ~otu.per$ana_igg.d0, na.rm=TRUE, permutations=999)#not sig
+#ana_igm.d0
+adonis(br_dist ~otu.per$ana_igm.d0, na.rm=TRUE, permutations=999)#not sig
+#cd8_igg.d0
+adonis(br_dist ~otu.per$cd8_igg.d0, na.rm=TRUE, permutations=999)#not sig
+
+otu.per <- inner_join(otu,pt.a.div[-18,]) #one row has a lot of missing value
+br_dist <- vegdist(otu.per[,(1:2490)], method="bray")
+
+# cd4_igg.d14
+adonis(br_dist ~otu.per$cd4_igg.d14, na.rm=TRUE, permutations=999)#sig
+# cd4_igg.fold
+adonis(br_dist ~otu.per$cd4_igg.fold, na.rm=TRUE, permutations=999)#not sig
+
+# dsdna_igg.d14
+adonis(br_dist ~otu.per$dsdna_igg.d14, na.rm=TRUE, permutations=999)#not sig
+# dsdna_igg.fold
+adonis(br_dist ~otu.per$dsdna_igg.fold, na.rm=TRUE, permutations=999)#not sig
+
+#ana_igg.d14
+adonis(br_dist ~otu.per$ana_igg.d14, na.rm=TRUE, permutations=999)#not sig
+#ana_igg.fold
+adonis(br_dist ~otu.per$ana_igg.fold, na.rm=TRUE, permutations=999)#not sig
+
+#ana_igm.d14
+adonis(br_dist ~otu.per$ana_igm.d14, na.rm=TRUE, permutations=999)#not sig
+#ana_igm.fold
+adonis(br_dist ~otu.per$ana_igm.fold, na.rm=TRUE, permutations=999)#not sig
+
+#cd8_igg.d14
+adonis(br_dist ~otu.per$cd8_igg.d14, na.rm=TRUE, permutations=999)#almost sig
+#cd8_igg.fold
+adonis(br_dist ~otu.per$cd8_igg.fold, na.rm=TRUE, permutations=999)#not sig
+
+### 1.5 indicator species
+# for indicator species, you need to 
+
+
+Gender  <-  multipatt(otu.g, clinical.g$Gender,
+                      control = how(nperm=350))
+levels(clinical.g$Gender)
+summary(Gender)
